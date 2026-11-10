@@ -1,0 +1,380 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Fluxo — conferência visual</title>
+    <style>/* Fluxo: tokens visuais e componentes da interface de quadros.
+   Cores, tipografia, espaços, raios e sombras vivem aqui — troque aqui para mudar o produto inteiro. */
+
+:root {
+  /* cores */
+  --oceano: #1554ad;
+  --oceano-escuro: #10428a;
+  --oceano-fraco: #e7effc;
+  --noite: #18324f;
+  --fundo: #edf3fa;
+  --superficie: #ffffff;
+  --superficie-vidro: rgb(255 255 255 / 72%);
+  --texto: #172b4d;
+  --secundario: #526582;
+  --borda: #dbe4f1;
+  --borda-forte: #c2d0e4;
+  --perigo: #b3261e;
+  --perigo-fraco: #fbedec;
+
+  /* tipografia */
+  --fonte: "Inter", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --titulo-1: 28px;
+  --titulo-2: 22px;
+  --titulo-3: 18px;
+  --corpo: 14px;
+  --meta: 13px;
+
+  /* espaços */
+  --e1: 4px;
+  --e2: 8px;
+  --e3: 12px;
+  --e4: 16px;
+  --e6: 24px;
+  --e8: 32px;
+
+  /* raios */
+  --r1: 4px;
+  --r2: 8px;
+  --r3: 12px;
+  --r-cheio: 999px;
+
+  /* sombras */
+  --sombra-1: 0 1px 2px rgb(24 50 79 / 6%);
+  --sombra-2: 0 2px 6px rgb(24 50 79 / 7%), 0 10px 24px rgb(24 50 79 / 6%);
+  --sombra-3: 0 18px 40px rgb(24 50 79 / 18%);
+
+  color-scheme: light;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  background: var(--fundo);
+  color: var(--texto);
+  font: var(--corpo)/1.5 var(--fonte);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+h1, h2, h3, h4, p, ul, ol, figure { margin: 0; padding: 0; }
+ul, ol { list-style: none; }
+button, input, select, textarea { font: inherit; color: inherit; }
+svg { flex: none; }
+
+:focus-visible {
+  outline: 2px solid var(--oceano);
+  outline-offset: 2px;
+  border-radius: var(--r1);
+}
+
+/* ---------- estrutura ---------- */
+
+.app {
+  display: grid;
+  grid-template-columns: 1fr;
+  min-height: 100vh;
+}
+
+.lateral {
+  background: var(--superficie);
+  border-bottom: 1px solid var(--borda);
+  padding: var(--e4);
+  display: flex;
+  flex-direction: column;
+  gap: var(--e4);
+  min-width: 0;
+}
+
+.marca { display: flex; align-items: center; gap: var(--e2); }
+.marca-simbolo {
+  width: 32px; height: 32px; border-radius: var(--r2);
+  background: var(--oceano); color: #fff;
+  display: grid; place-items: center;
+}
+.marca-nome { font-size: var(--titulo-3); font-weight: 700; letter-spacing: -0.01em; color: var(--noite); }
+
+.lateral-topo { display: flex; align-items: center; justify-content: space-between; gap: var(--e2); }
+.lateral-titulo { font-size: var(--meta); font-weight: 600; color: var(--secundario); }
+
+.lateral-lista { display: flex; flex-direction: column; gap: var(--e1); }
+.lateral-item {
+  display: flex; align-items: center; gap: var(--e1);
+  border-radius: var(--r2);
+  padding: var(--e1);
+  border-left: 3px solid transparent;
+  transition: background-color 160ms ease-out;
+}
+.lateral-item:hover { background: var(--fundo); }
+.lateral-item[data-ativo] { background: var(--oceano-fraco); border-left-color: var(--oceano); }
+.lateral-escolha {
+  flex: 1; min-width: 0;
+  background: none; border: 0; padding: var(--e2) var(--e2);
+  text-align: left; font-weight: 500; color: var(--texto);
+  border-radius: var(--r1);
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.lateral-item[data-ativo] .lateral-escolha { font-weight: 600; color: var(--noite); }
+.lateral-acoes { display: flex; gap: 2px; opacity: .55; transition: opacity 160ms ease-out; }
+.lateral-acoes .botao { width: 36px; min-width: 36px; min-height: 36px; height: 36px; }
+.lateral-item:hover .lateral-acoes, .lateral-item:focus-within .lateral-acoes { opacity: 1; }
+
+.lateral-vazio { color: var(--secundario); padding: var(--e2); }
+
+.canvas { min-width: 0; display: flex; flex-direction: column; }
+
+.quadro-topo {
+  display: flex; align-items: center; justify-content: space-between; gap: var(--e4);
+  padding: var(--e6) var(--e8) var(--e4);
+}
+.quadro-titulo { font-size: var(--titulo-1); line-height: 1.2; letter-spacing: -0.02em; color: var(--noite); text-wrap: balance; }
+.quadro-acoes { display: flex; gap: var(--e1); }
+
+.listas {
+  display: flex; align-items: flex-start; gap: var(--e4);
+  padding: 0 var(--e8) var(--e8);
+  overflow-x: auto;
+  scroll-snap-type: x proximity;
+  flex: 1;
+}
+
+.lista {
+  flex: 0 0 280px; width: 280px;
+  scroll-snap-align: start;
+  background: var(--superficie-vidro);
+  border: 1px solid var(--borda);
+  border-radius: var(--r3);
+  padding: var(--e3);
+  display: flex; flex-direction: column; gap: var(--e2);
+  backdrop-filter: blur(2px);
+}
+.lista[data-alvo] { border-color: var(--oceano); box-shadow: 0 0 0 3px rgb(21 84 173 / 18%); }
+
+.lista-topo { display: flex; align-items: center; gap: var(--e2); }
+.lista-nome {
+  flex: 1; min-width: 0;
+  background: none; border: 0; padding: var(--e1) var(--e2);
+  font-size: var(--corpo); font-weight: 600; color: var(--noite);
+  text-align: left; border-radius: var(--r1);
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.lista-nome:hover { background: rgb(24 50 79 / 6%); }
+.lista-contagem { font-size: var(--meta); color: var(--secundario); font-variant-numeric: tabular-nums; }
+
+.lista-cartoes { display: flex; flex-direction: column; gap: var(--e2); min-height: var(--e2); }
+
+.cartao {
+  position: relative;
+  background: var(--superficie);
+  border: 1px solid var(--borda);
+  border-radius: var(--r2);
+  padding: var(--e3);
+  display: flex; flex-direction: column; gap: var(--e2);
+  box-shadow: var(--sombra-1);
+  cursor: grab;
+  transition: box-shadow 180ms ease-out, transform 180ms ease-out, opacity 180ms ease-out;
+}
+.cartao:hover { box-shadow: var(--sombra-2); }
+.cartao[data-arrastando] { opacity: .45; cursor: grabbing; }
+.cartao[data-alvo]::before {
+  content: ""; position: absolute; left: calc(var(--e2) * -1); right: calc(var(--e2) * -1); top: calc(var(--e2) * -1);
+  height: 2px; background: var(--oceano); border-radius: var(--r-cheio);
+}
+.cartao-topo { display: flex; align-items: flex-start; gap: var(--e2); }
+.cartao-titulo {
+  flex: 1; min-width: 0;
+  background: none; border: 0; padding: 0; text-align: left;
+  font-size: var(--corpo); font-weight: 500; color: var(--texto);
+  border-radius: var(--r1); text-wrap: pretty;
+}
+.cartao-titulo:hover { color: var(--oceano); }
+.cartao-descricao {
+  font-size: var(--meta); color: var(--secundario); text-wrap: pretty;
+  display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden;
+}
+.cartao-rodape { display: flex; align-items: center; gap: var(--e2); color: var(--secundario); font-size: var(--meta); }
+.cartao-selo { display: inline-flex; align-items: center; gap: var(--e1); }
+.cartao-empunho { margin-left: auto; color: var(--borda-forte); }
+.cartao:hover .cartao-empunho { color: var(--secundario); }
+
+.lista-rodape { margin-top: auto; }
+.lista-vazia { font-size: var(--meta); color: var(--secundario); padding: var(--e2) var(--e1); }
+
+.nova-lista { flex: 0 0 260px; width: 260px; scroll-snap-align: start; }
+
+.rodape-linha { display: flex; gap: var(--e2); align-items: center; }
+
+.form-linha { display: flex; flex-direction: column; gap: var(--e2); }
+.form-linha .campo-entrada { background: var(--superficie); }
+
+/* ---------- botões ---------- */
+
+.botao {
+  font: inherit; font-weight: 600; line-height: 1;
+  display: inline-flex; align-items: center; justify-content: center; gap: var(--e2);
+  min-height: 40px; padding: var(--e2) var(--e4);
+  border-radius: var(--r2);
+  border: 1px solid var(--borda-forte);
+  background: var(--superficie);
+  color: var(--texto);
+  cursor: pointer;
+  transition: background-color 160ms ease-out, border-color 160ms ease-out, color 160ms ease-out, transform 120ms ease-out;
+}
+.botao:hover:not(:disabled) { background: var(--fundo); }
+.botao:active:not(:disabled) { transform: scale(.96); }
+.botao:disabled { opacity: .5; cursor: not-allowed; }
+
+.botao-primario { background: var(--oceano); border-color: var(--oceano); color: #fff; }
+.botao-primario:hover:not(:disabled) { background: var(--oceano-escuro); border-color: var(--oceano-escuro); }
+
+.botao-perigo { color: var(--perigo); background: transparent; border-color: transparent; }
+.botao-perigo:hover:not(:disabled) { background: var(--perigo-fraco); }
+
+.botao-perigo-solido { background: var(--perigo); border-color: var(--perigo); color: #fff; }
+.botao-perigo-solido:hover:not(:disabled) { background: #8f1e17; border-color: #8f1e17; }
+
+.botao-fantasma { background: transparent; border-color: transparent; color: var(--secundario); }
+.botao-fantasma:hover:not(:disabled) { background: rgb(24 50 79 / 8%); color: var(--noite); }
+
+.botao-icone { width: 40px; min-width: 40px; padding: 0; }
+
+.botao-bloco { width: 100%; }
+
+/* ---------- campos ---------- */
+
+.campo { display: grid; gap: var(--e1); }
+.campo-rotulo { font-size: var(--meta); font-weight: 600; color: var(--secundario); }
+.campo-entrada {
+  font: inherit; color: inherit;
+  min-height: 40px; padding: var(--e2) var(--e3);
+  border: 1px solid var(--borda-forte); border-radius: var(--r2);
+  background: var(--superficie); width: 100%;
+  transition: border-color 160ms ease-out, box-shadow 160ms ease-out;
+}
+.campo-entrada:hover { border-color: var(--secundario); }
+.campo-entrada:focus { border-color: var(--oceano); box-shadow: 0 0 0 3px rgb(21 84 173 / 18%); outline: none; }
+.campo-entrada::placeholder { color: var(--secundario); opacity: .8; }
+.campo-entrada[aria-invalid="true"] { border-color: var(--perigo); }
+textarea.campo-entrada { min-height: 96px; resize: vertical; }
+.campo-erro { color: var(--perigo); font-size: var(--meta); }
+
+/* ---------- diálogos ---------- */
+
+.dialogo {
+  border: 0; padding: 0; background: transparent;
+  width: min(480px, calc(100vw - 32px));
+  color: var(--texto);
+}
+.dialogo::backdrop { background: rgb(24 50 79 / 45%); }
+.dialogo-caixa {
+  background: var(--superficie);
+  border-radius: var(--r3);
+  padding: var(--e6);
+  box-shadow: var(--sombra-3);
+  display: grid; gap: var(--e4);
+  border: 1px solid var(--borda);
+}
+.dialogo-topo { display: flex; justify-content: space-between; align-items: flex-start; gap: var(--e4); }
+.dialogo-topo h2 { font-size: var(--titulo-3); color: var(--noite); text-wrap: balance; }
+.dialogo-texto { color: var(--secundario); text-wrap: pretty; }
+.formulario { display: grid; gap: var(--e4); }
+.acoes { display: flex; justify-content: flex-end; gap: var(--e2); }
+
+/* ---------- menu ---------- */
+
+.menu {
+  position: fixed; z-index: 40;
+  min-width: 208px; max-width: 280px;
+  padding: var(--e1);
+  background: var(--superficie);
+  border: 1px solid var(--borda);
+  border-radius: var(--r2);
+  box-shadow: var(--sombra-3);
+  display: grid; gap: 2px;
+  max-height: min(320px, 70vh); overflow-y: auto;
+}
+.menu-item { display: block; }
+.menu-botao {
+  width: 100%;
+  display: flex; align-items: center; gap: var(--e2);
+  min-height: 40px; padding: var(--e2) var(--e3);
+  background: none; border: 0; border-radius: var(--r1);
+  font-size: var(--corpo); color: var(--texto); text-align: left;
+  cursor: pointer;
+  transition: background-color 140ms ease-out, color 140ms ease-out;
+}
+.menu-botao:hover { background: var(--fundo); }
+.menu-botao[data-perigo] { color: var(--perigo); }
+.menu-botao[data-perigo]:hover { background: var(--perigo-fraco); }
+.menu-botao[aria-expanded="true"] { background: var(--oceano-fraco); color: var(--noite); }
+.menu-seta { margin-left: auto; color: var(--secundario); }
+.menu-grupo { padding: var(--e2) var(--e3) var(--e1); font-size: var(--meta); font-weight: 600; color: var(--secundario); }
+.menu-separador { height: 1px; background: var(--borda); margin: var(--e1) 0; }
+
+/* ---------- estados ---------- */
+
+.aviso {
+  display: flex; gap: var(--e3); align-items: flex-start; justify-content: space-between;
+  margin: 0 var(--e8) var(--e4);
+  padding: var(--e3) var(--e4);
+  border: 1px solid var(--perigo); border-left-width: 3px;
+  border-radius: var(--r2);
+  background: var(--perigo-fraco); color: var(--perigo);
+}
+.aviso-texto { display: flex; gap: var(--e2); align-items: flex-start; }
+.aviso p { text-wrap: pretty; }
+
+.vazio-canvas {
+  flex: 1; display: grid; place-content: center; justify-items: center; gap: var(--e3);
+  padding: var(--e8) var(--e4); text-align: center;
+}
+.vazio-canvas h2 { font-size: var(--titulo-2); color: var(--noite); text-wrap: balance; }
+.vazio-canvas p { color: var(--secundario); max-width: 46ch; text-wrap: pretty; }
+
+.esqueleto { display: grid; gap: var(--e2); }
+.esqueleto-bloco { height: 64px; border-radius: var(--r2); background: rgb(255 255 255 / 70%); border: 1px solid var(--borda); }
+.esqueleto-linha { height: 12px; border-radius: var(--r1); background: rgb(24 50 79 / 8%); }
+
+.carregando-line { display: flex; align-items: center; gap: var(--e2); color: var(--secundario); }
+.girando { animation: girar 900ms linear infinite; }
+@keyframes girar { to { transform: rotate(360deg); } }
+
+/* ---------- responsivo ---------- */
+
+@media (min-width: 768px) {
+  .app { grid-template-columns: 252px 1fr; }
+  .lateral { position: sticky; top: 0; height: 100vh; overflow-y: auto; border-bottom: 0; border-right: 1px solid var(--borda); }
+  .lista { max-height: calc(100vh - 190px); }
+  .lista-cartoes { overflow-y: auto; }
+}
+
+@media (max-width: 767px) {
+  .lateral { gap: var(--e3); }
+  .lateral-lista { flex-direction: row; overflow-x: auto; padding-bottom: var(--e1); }
+  .lateral-item { flex: 0 0 auto; border-left: 0; border-bottom: 3px solid transparent; }
+  .lateral-item[data-ativo] { border-left-color: transparent; border-bottom-color: var(--oceano); }
+  .quadro-topo { padding: var(--e4) var(--e4) var(--e3); }
+  .quadro-titulo { font-size: var(--titulo-2); }
+  .listas { padding: 0 var(--e4) var(--e6); gap: var(--e3); }
+  .aviso { margin: 0 var(--e4) var(--e3); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+</style>
+  </head>
+  <body><div class="app"><aside class="lateral" aria-label="Quadros"><div class="marca"><span class="marca-simbolo" aria-hidden="true"><svg class="" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect x="3" y="4" width="5" height="16" rx="1.5"></rect><rect x="10" y="4" width="5" height="10" rx="1.5"></rect><rect x="17" y="4" width="4" height="14" rx="1.5"></rect></svg></span><span class="marca-nome">Fluxo</span></div><div class="lateral-topo"><h2 class="lateral-titulo">Quadros</h2><button type="button" class="botao botao-fantasma botao-icone" aria-label="Criar quadro"><svg class="" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 5v14"></path><path d="M5 12h14"></path></svg></button></div><ul class="lateral-lista"><li><div class="lateral-item" data-ativo=""><button type="button" class="lateral-escolha" aria-current="page">Lançamento do site</button><span class="lateral-acoes"><button type="button" class="botao botao-fantasma botao-icone" aria-label="Renomear quadro Lançamento do site"><svg class="" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 20h9"></path><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"></path></svg></button><button type="button" class="botao botao-fantasma botao-icone" aria-label="Excluir quadro Lançamento do site"><svg class="" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M3 6h18"></path><path d="M8 6V4h8v2"></path><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"></path><path d="M10 11v6"></path><path d="M14 11v6"></path></svg></button></span></div></li><li><div class="lateral-item"><button type="button" class="lateral-escolha">Suporte de agosto</button><span class="lateral-acoes"><button type="button" class="botao botao-fantasma botao-icone" aria-label="Renomear quadro Suporte de agosto"><svg class="" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 20h9"></path><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"></path></svg></button><button type="button" class="botao botao-fantasma botao-icone" aria-label="Excluir quadro Suporte de agosto"><svg class="" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M3 6h18"></path><path d="M8 6V4h8v2"></path><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"></path><path d="M10 11v6"></path><path d="M14 11v6"></path></svg></button></span></div></li><li><div class="lateral-item"><button type="button" class="lateral-escolha">Pesquisa de clientes</button><span class="lateral-acoes"><button type="button" class="botao botao-fantasma botao-icone" aria-label="Renomear quadro Pesquisa de clientes"><svg class="" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 20h9"></path><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"></path></svg></button><button type="button" class="botao botao-fantasma botao-icone" aria-label="Excluir quadro Pesquisa de clientes"><svg class="" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M3 6h18"></path><path d="M8 6V4h8v2"></path><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"></path><path d="M10 11v6"></path><path d="M14 11v6"></path></svg></button></span></div></li></ul></aside><main class="canvas"><header class="quadro-topo"><h1 class="quadro-titulo">Lançamento do site</h1><div class="quadro-acoes"><button type="button" class="botao botao-fantasma botao-icone" aria-label="Renomear quadro"><svg class="" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 20h9"></path><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"></path></svg></button><button type="button" class="botao botao-fantasma botao-icone" aria-label="Excluir quadro"><svg class="" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M3 6h18"></path><path d="M8 6V4h8v2"></path><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"></path><path d="M10 11v6"></path><path d="M14 11v6"></path></svg></button></div></header><div class="listas"><section class="lista" aria-label="A fazer"><header class="lista-topo"><button type="button" class="lista-nome" title="Renomear lista">A fazer</button><span class="lista-contagem">3</span><button type="button" class="botao botao-fantasma botao-icone" aria-label="Opções da lista A fazer" aria-haspopup="menu" aria-expanded="false"><svg class="" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="12" cy="5" r="1.4"></circle><circle cx="12" cy="12" r="1.4"></circle><circle cx="12" cy="19" r="1.4"></circle></svg></button></header><div class="lista-cartoes"><article class="cartao" draggable="true"><div class="cartao-topo"><button type="button" class="cartao-titulo">Revisar textos da página inicial</button><button type="button" class="botao botao-fantasma botao-icone" aria-label="Opções do cartão Revisar textos da página inicial" aria-haspopup="menu" aria-expanded="false"><svg class="" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="12" cy="5" r="1.4"></circle><circle cx="12" cy="12" r="1.4"></circle><circle cx="12" cy="19" r="1.4"></circle></svg></button></div><p class="cartao-descricao">Ajustar os blocos de preço e a seção de depoimentos com as novas mensagens.</p><footer class="cartao-rodape"><span class="cartao-selo"><svg class="" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" role="img" aria-label="Tem descrição" focusable="false"><path d="M4 6h16"></path><path d="M4 12h10"></path><path d="M4 18h7"></path></svg>Descrição</span><svg class="cartao-empunho" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" role="img" aria-label="Arraste para mover o cartão" focusable="false"><circle cx="9" cy="6" r="1.3"></circle><circle cx="15" cy="6" r="1.3"></circle><circle cx="9" cy="12" r="1.3"></circle><circle cx="15" cy="12" r="1.3"></circle><circle cx="9" cy="18" r="1.3"></circle><circle cx="15" cy="18" r="1.3"></circle></svg></footer></article><article class="cartao" draggable="true"><div class="cartao-topo"><button type="button" class="cartao-titulo">Preparar imagens do banner</button><button type="button" class="botao botao-fantasma botao-icone" aria-label="Opções do cartão Preparar imagens do banner" aria-haspopup="menu" aria-expanded="false"><svg class="" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="12" cy="5" r="1.4"></circle><circle cx="12" cy="12" r="1.4"></circle><circle cx="12" cy="19" r="1.4"></circle></svg></button></div><footer class="cartao-rodape"><span></span><svg class="cartao-empunho" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" role="img" aria-label="Arraste para mover o cartão" focusable="false"><circle cx="9" cy="6" r="1.3"></circle><circle cx="15" cy="6" r="1.3"></circle><circle cx="9" cy="12" r="1.3"></circle><circle cx="15" cy="12" r="1.3"></circle><circle cx="9" cy="18" r="1.3"></circle><circle cx="15" cy="18" r="1.3"></circle></svg></footer></article><article class="cartao" draggable="true"><div class="cartao-topo"><button type="button" class="cartao-titulo">Configurar o formulário de contato</button><button type="button" class="botao botao-fantasma botao-icone" aria-label="Opções do cartão Configurar o formulário de contato" aria-haspopup="menu" aria-expanded="false"><svg class="" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="12" cy="5" r="1.4"></circle><circle cx="12" cy="12" r="1.4"></circle><circle cx="12" cy="19" r="1.4"></circle></svg></button></div><footer class="cartao-rodape"><span></span><svg class="cartao-empunho" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" role="img" aria-label="Arraste para mover o cartão" focusable="false"><circle cx="9" cy="6" r="1.3"></circle><circle cx="15" cy="6" r="1.3"></circle><circle cx="9" cy="12" r="1.3"></circle><circle cx="15" cy="12" r="1.3"></circle><circle cx="9" cy="18" r="1.3"></circle><circle cx="15" cy="18" r="1.3"></circle></svg></footer></article></div><div class="lista-rodape"><button type="button" class="botao botao-suave  botao-bloco"><svg class="" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 5v14"></path><path d="M5 12h14"></path></svg>Adicionar cartão</button></div></section><section class="lista" aria-label="Em andamento"><header class="lista-topo"><button type="button" class="lista-nome" title="Renomear lista">Em andamento</button><span class="lista-contagem">2</span><button type="button" class="botao botao-fantasma botao-icone" aria-label="Opções da lista Em andamento" aria-haspopup="menu" aria-expanded="false"><svg class="" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="12" cy="5" r="1.4"></circle><circle cx="12" cy="12" r="1.4"></circle><circle cx="12" cy="19" r="1.4"></circle></svg></button></header><div class="lista-cartoes"><article class="cartao" draggable="true"><div class="cartao-topo"><button type="button" class="cartao-titulo">Migrar o catálogo antigo</button><button type="button" class="botao botao-fantasma botao-icone" aria-label="Opções do cartão Migrar o catálogo antigo" aria-haspopup="menu" aria-expanded="false"><svg class="" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="12" cy="5" r="1.4"></circle><circle cx="12" cy="12" r="1.4"></circle><circle cx="12" cy="19" r="1.4"></circle></svg></button></div><p class="cartao-descricao">Faltam duas categorias. O time de conteúdo valida as fotos antes de publicar.</p><footer class="cartao-rodape"><span class="cartao-selo"><svg class="" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" role="img" aria-label="Tem descrição" focusable="false"><path d="M4 6h16"></path><path d="M4 12h10"></path><path d="M4 18h7"></path></svg>Descrição</span><svg class="cartao-empunho" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" role="img" aria-label="Arraste para mover o cartão" focusable="false"><circle cx="9" cy="6" r="1.3"></circle><circle cx="15" cy="6" r="1.3"></circle><circle cx="9" cy="12" r="1.3"></circle><circle cx="15" cy="12" r="1.3"></circle><circle cx="9" cy="18" r="1.3"></circle><circle cx="15" cy="18" r="1.3"></circle></svg></footer></article><article class="cartao" draggable="true"><div class="cartao-topo"><button type="button" class="cartao-titulo">Testar o checkout no celular</button><button type="button" class="botao botao-fantasma botao-icone" aria-label="Opções do cartão Testar o checkout no celular" aria-haspopup="menu" aria-expanded="false"><svg class="" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="12" cy="5" r="1.4"></circle><circle cx="12" cy="12" r="1.4"></circle><circle cx="12" cy="19" r="1.4"></circle></svg></button></div><footer class="cartao-rodape"><span></span><svg class="cartao-empunho" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" role="img" aria-label="Arraste para mover o cartão" focusable="false"><circle cx="9" cy="6" r="1.3"></circle><circle cx="15" cy="6" r="1.3"></circle><circle cx="9" cy="12" r="1.3"></circle><circle cx="15" cy="12" r="1.3"></circle><circle cx="9" cy="18" r="1.3"></circle><circle cx="15" cy="18" r="1.3"></circle></svg></footer></article></div><div class="lista-rodape"><button type="button" class="botao botao-suave  botao-bloco"><svg class="" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 5v14"></path><path d="M5 12h14"></path></svg>Adicionar cartão</button></div></section><section class="lista" aria-label="Pronto"><header class="lista-topo"><button type="button" class="lista-nome" title="Renomear lista">Pronto</button><span class="lista-contagem">1</span><button type="button" class="botao botao-fantasma botao-icone" aria-label="Opções da lista Pronto" aria-haspopup="menu" aria-expanded="false"><svg class="" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="12" cy="5" r="1.4"></circle><circle cx="12" cy="12" r="1.4"></circle><circle cx="12" cy="19" r="1.4"></circle></svg></button></header><div class="lista-cartoes"><article class="cartao" draggable="true"><div class="cartao-topo"><button type="button" class="cartao-titulo">Definir paleta do site</button><button type="button" class="botao botao-fantasma botao-icone" aria-label="Opções do cartão Definir paleta do site" aria-haspopup="menu" aria-expanded="false"><svg class="" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="12" cy="5" r="1.4"></circle><circle cx="12" cy="12" r="1.4"></circle><circle cx="12" cy="19" r="1.4"></circle></svg></button></div><footer class="cartao-rodape"><span></span><svg class="cartao-empunho" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" role="img" aria-label="Arraste para mover o cartão" focusable="false"><circle cx="9" cy="6" r="1.3"></circle><circle cx="15" cy="6" r="1.3"></circle><circle cx="9" cy="12" r="1.3"></circle><circle cx="15" cy="12" r="1.3"></circle><circle cx="9" cy="18" r="1.3"></circle><circle cx="15" cy="18" r="1.3"></circle></svg></footer></article></div><div class="lista-rodape"><button type="button" class="botao botao-suave  botao-bloco"><svg class="" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 5v14"></path><path d="M5 12h14"></path></svg>Adicionar cartão</button></div></section><section class="lista" aria-label="Arquivo"><header class="lista-topo"><button type="button" class="lista-nome" title="Renomear lista">Arquivo</button><span class="lista-contagem">0</span><button type="button" class="botao botao-fantasma botao-icone" aria-label="Opções da lista Arquivo" aria-haspopup="menu" aria-expanded="false"><svg class="" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="12" cy="5" r="1.4"></circle><circle cx="12" cy="12" r="1.4"></circle><circle cx="12" cy="19" r="1.4"></circle></svg></button></header><div class="lista-cartoes"><p class="lista-vazia">Nenhum cartão nesta lista.</p></div><div class="lista-rodape"><button type="button" class="botao botao-suave  botao-bloco"><svg class="" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 5v14"></path><path d="M5 12h14"></path></svg>Adicionar cartão</button></div></section><div class="nova-lista"><button type="button" class="botao botao-suave  botao-bloco"><svg class="" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 5v14"></path><path d="M5 12h14"></path></svg>Adicionar lista</button></div></div></main></div></body>
+</html>

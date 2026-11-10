@@ -1,0 +1,9 @@
+node_modules
+dist
+server/dados
+.expxv/
+.DS_Store
+.env
+.env.*
+!.env.example
+*.log
