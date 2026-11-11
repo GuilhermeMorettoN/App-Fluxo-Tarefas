@@ -6,13 +6,13 @@ import { rotasDeQuadros } from "./quadros.js";
 import { rotasDeAuth } from "./auth.js";
 import { rotasDeTickets } from "./tickets.js";
 
-export function criarApp({ banco = ":memory:" } = {}) {
+export function criarApp({ banco = ":memory:", tickets } = {}) {
   const db = abrirBanco(banco);
   const app = criarRoteador();
   app.get("/api/saude", () => ({ ok: true }));
   rotasDeAuth(app, db);
   rotasDeItens(app, db);
   rotasDeQuadros(app, db);
-  rotasDeTickets(app, db);
+  rotasDeTickets(app, db, tickets);
   return { servidor: app.servidor, db };
 }

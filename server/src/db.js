@@ -83,6 +83,19 @@ const MIGRACOES = [
      ('msg-2', 'ticket-boas-vindas', 'agent', 'Suporte Fluxo', 'Oi! Por enquanto os quadros ficam visíveis para todos que acessam o Fluxo. O convite por e-mail está no nosso planejamento e aviso por aqui assim que estiver disponível.', '2026-11-10T10:02:00.000Z'),
      ('msg-3', 'ticket-exportar', 'user', 'Você', 'Existe alguma forma de exportar os cartões de uma lista para uma planilha?', '2026-11-09T15:00:00.000Z'),
      ('msg-4', 'ticket-exportar', 'agent', 'Suporte Fluxo', 'Ainda não há exportação direta. Registramos o pedido e vamos encerrar este ticket; abra um novo se precisar de algo mais.', '2026-11-09T15:20:00.000Z');`,
+  // Vínculo ticket ↔ issue do GitHub (runtime github-actions). owner_hash = hash do cookie do cliente que abriu.
+  `CREATE TABLE ticket_github (
+     ticket_id TEXT PRIMARY KEY REFERENCES ticket(id) ON DELETE CASCADE,
+     owner_hash TEXT NOT NULL,
+     request_id TEXT NOT NULL UNIQUE,
+     issue_number INTEGER,
+     run_id TEXT,
+     result_path TEXT,
+     pr_number INTEGER,
+     phase TEXT NOT NULL,
+     sent_ids TEXT NOT NULL DEFAULT '[]',
+     erro TEXT
+   )`,
 ];
 
 /** `caminho` = arquivo do banco; `:memory:` nos testes. */

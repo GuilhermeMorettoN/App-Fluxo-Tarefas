@@ -21,3 +21,9 @@
 
 - Actions: habilitadas no repositório (`allowed_actions: all`).
 - GitHub Copilot cloud agent: não disponível; o Copilot não aparece entre os atores atribuíveis do repositório (precisa de plano Copilot pago habilitado para a conta).
+
+## Etapa 03: app → issue → coordenador no Actions (2026-11-11)
+
+- Backend (`AGENT_RUNTIME=github-actions`): ticket novo cria issue `origin:app`, guarda dono/requestId/fase em `ticket_github` e dispara `ai-agents.yml`; ao abrir o ticket, lê o comentário de controle e publica a mensagem N1 uma única vez.
+- Actions: `.github/workflows/ai-agents.yml` + `automacao/coordenador.mjs`; dry-run por padrão; sem PR nesta etapa (pedido de mudança vai para pessoa da equipe).
+- Pendente para o ensaio real: provedor de IA ainda não definido (`AI_PROVIDER`/`AI_MODEL`); o controlador recusa a chamada real até ser implementado.
