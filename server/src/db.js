@@ -58,6 +58,31 @@ const MIGRACOES = [
      ('card-api', 'list-fazendo', 'Montar a API de quadros', 'Boards, listas e cartões com movimentação entre listas.', 0),
      ('card-paleta', 'list-pronto', 'Escolher a paleta de cores', '', 0),
      ('card-metricas', 'list-backlog', 'Medir tempo por cartão', '', 0);`,
+  // Atendimento: cada ticket é uma conversa; mensagens de usuário, agente (humano ou autônomo) ou sistema.
+  `CREATE TABLE ticket (
+     id TEXT PRIMARY KEY,
+     title TEXT NOT NULL,
+     status TEXT NOT NULL DEFAULT 'open' CHECK (status IN ('open', 'resolved')),
+     criado_em TEXT NOT NULL,
+     atualizado_em TEXT NOT NULL
+   );
+   CREATE TABLE ticket_message (
+     id TEXT PRIMARY KEY,
+     ticket_id TEXT NOT NULL REFERENCES ticket(id) ON DELETE CASCADE,
+     role TEXT NOT NULL CHECK (role IN ('user', 'agent', 'system')),
+     author TEXT NOT NULL DEFAULT '',
+     content TEXT NOT NULL,
+     criado_em TEXT NOT NULL
+   );
+   CREATE INDEX ticket_message_por_ticket ON ticket_message (ticket_id, criado_em);
+   INSERT INTO ticket (id, title, status, criado_em, atualizado_em) VALUES
+     ('ticket-boas-vindas', 'Como convido minha equipe para um quadro?', 'open', '2026-11-10T10:00:00.000Z', '2026-11-10T10:02:00.000Z'),
+     ('ticket-exportar', 'Exportar cartões para planilha', 'resolved', '2026-11-09T15:00:00.000Z', '2026-11-09T15:20:00.000Z');
+   INSERT INTO ticket_message (id, ticket_id, role, author, content, criado_em) VALUES
+     ('msg-1', 'ticket-boas-vindas', 'user', 'Você', 'Olá! Quero que outras pessoas da equipe vejam o quadro "Sprint da semana". Como faço o convite?', '2026-11-10T10:00:00.000Z'),
+     ('msg-2', 'ticket-boas-vindas', 'agent', 'Suporte Fluxo', 'Oi! Por enquanto os quadros ficam visíveis para todos que acessam o Fluxo. O convite por e-mail está no nosso planejamento e aviso por aqui assim que estiver disponível.', '2026-11-10T10:02:00.000Z'),
+     ('msg-3', 'ticket-exportar', 'user', 'Você', 'Existe alguma forma de exportar os cartões de uma lista para uma planilha?', '2026-11-09T15:00:00.000Z'),
+     ('msg-4', 'ticket-exportar', 'agent', 'Suporte Fluxo', 'Ainda não há exportação direta. Registramos o pedido e vamos encerrar este ticket; abra um novo se precisar de algo mais.', '2026-11-09T15:20:00.000Z');`,
 ];
 
 /** `caminho` = arquivo do banco; `:memory:` nos testes. */

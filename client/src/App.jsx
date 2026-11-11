@@ -8,6 +8,9 @@ import { Confirmar } from "./componentes/Confirmar.jsx";
 import { Dialogo } from "./componentes/Dialogo.jsx";
 import { Icone } from "./componentes/Icone.jsx";
 import { moverCartaoEntreListas } from "./ordem.js";
+import { ListaTickets, TelaAtendimento, useAtendimento } from "./Atendimento.jsx";
+
+const telaDaUrl = () => (window.location.pathname.startsWith("/atendimento") ? "atendimento" : "quadros");
 
 /** Telas em espera: blocos discretos, sem animação, enquanto a API responde. */
 function Esqueleto() {
@@ -43,6 +46,21 @@ export function App() {
   const [erro, setErro] = useState(null);
   const [dialogo, setDialogo] = useState(null);
   const [tentativa, setTentativa] = useState(0);
+  const [tela, setTela] = useState(telaDaUrl);
+  const atendimento = useAtendimento(tela === "atendimento");
+
+  // Cada tela tem endereço próprio (/quadro, /atendimento); voltar do navegador troca a tela.
+  useEffect(() => {
+    const aoVoltar = () => setTela(telaDaUrl());
+    window.addEventListener("popstate", aoVoltar);
+    return () => window.removeEventListener("popstate", aoVoltar);
+  }, []);
+
+  const trocarTela = (nova) => {
+    if (nova === tela) return;
+    window.history.pushState(null, "", nova === "atendimento" ? "/atendimento" : "/quadro");
+    setTela(nova);
+  };
 
   // Quadros: a lista vem da API e define qual quadro fica aberto.
   useEffect(() => {
@@ -256,14 +274,23 @@ export function App() {
   return (
     <div className="app">
       <BarraLateral
+        tela={tela}
+        aoTrocarTela={trocarTela}
         quadros={quadros}
         quadroId={quadroId}
         aoSelecionar={setQuadroId}
         aoNovoQuadro={() => setDialogo({ tipo: "novo-quadro" })}
         aoRenomear={(quadro) => setDialogo({ tipo: "renomear-quadro", quadro })}
         aoExcluir={(quadro) => setDialogo({ tipo: "excluir-quadro", quadro })}
-      />
+      >
+        <ListaTickets atendimento={atendimento} aoExcluir={(ticket) => setDialogo({ tipo: "excluir-ticket", ticket })} />
+      </BarraLateral>
 
+      {tela === "atendimento" ? (
+        <main className="canvas canvas-atendimento">
+          <TelaAtendimento atendimento={atendimento} />
+        </main>
+      ) : (
       <main className="canvas">
         {erro ? (
           <div className="aviso" role="alert">
@@ -277,6 +304,18 @@ export function App() {
 
         {conteudo()}
       </main>
+      )}
+
+      {dialogo?.tipo === "excluir-ticket" ? (
+        <Confirmar
+          aberto
+          titulo="Excluir ticket"
+          descricao={`Excluir "${dialogo.ticket.title}" apaga a conversa inteira. Não dá para desfazer.`}
+          rotuloConfirmar="Excluir ticket"
+          aoConfirmar={() => { void atendimento.excluir(dialogo.ticket.id); setDialogo(null); }}
+          aoFechar={() => setDialogo(null)}
+        />
+      ) : null}
 
       {dialogo?.tipo === "novo-quadro" ? (
         <Dialogo aberto titulo="Novo quadro" descricao="Dê um nome para o trabalho que este quadro vai acompanhar." aoFechar={() => setDialogo(null)}>

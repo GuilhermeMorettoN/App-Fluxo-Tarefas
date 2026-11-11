@@ -64,6 +64,16 @@ JSON puro, sem login obrigatório. A interface fala com a API pelo proxy
 | POST | `/api/lists/:id/cards` | `{card}` |
 | PATCH | `/api/cards/:id` | `{card}` |
 | DELETE | `/api/cards/:id` | `{ok:true}` |
+| GET | `/api/tickets` | `{tickets:[{id,title,status,createdAt,updatedAt,lastMessage}]}` |
+| POST | `/api/tickets` | `{content}` → `{ticket,messages}` (abre já com a 1ª mensagem) |
+| GET | `/api/tickets/:id` | `{ticket,messages:[{id,role,author,content,createdAt}]}` |
+| PATCH | `/api/tickets/:id` | `{title?,status?: "open"\|"resolved"}` → `{ticket}` |
+| DELETE | `/api/tickets/:id` | `{ok:true}` |
+| POST | `/api/tickets/:id/messages` | `{content,role?: "user"\|"agent"\|"system",author?}` → `{message,ticket}` |
+
+Atendimento: cada ticket é uma conversa. Um agente autônomo responde com
+`POST /api/tickets/:id/messages` e `role: "agent"`. A tela busca mensagens novas
+a cada 5 s.
 
 IDs são strings, `position` é número e erros voltam como `{error:"mensagem"}`
 com o status adequado. Excluir um quadro apaga listas e cartões em cascata;

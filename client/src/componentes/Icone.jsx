@@ -82,6 +82,21 @@ const DESENHOS = {
       <circle cx="15" cy="18" r="1.3" />
     </>
   ),
+  conversa: <path d="M21 12a8 8 0 0 1-11.6 7.1L4 20l1-4.6A8 8 0 1 1 21 12Z" />,
+  enviar: (
+    <>
+      <path d="M12 19V5" />
+      <path d="m5 12 7-7 7 7" />
+    </>
+  ),
+  check: <path d="m5 12 5 5 9-10" />,
+  suporte: (
+    <>
+      <path d="M4 14v-2a8 8 0 0 1 16 0v2" />
+      <rect x="3" y="14" width="4" height="6" rx="1.5" />
+      <rect x="17" y="14" width="4" height="6" rx="1.5" />
+    </>
+  ),
   atualizar: (
     <>
       <path d="M20 12a8 8 0 1 1-2.3-5.6" />
