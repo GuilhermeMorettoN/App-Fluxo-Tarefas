@@ -1,0 +1,19 @@
+{
+  "product": "Fluxo",
+  "description": "Quadro de tarefas web com quadros, listas, cartões e área de atendimento por tickets.",
+  "features": [
+    "Quadros: criar, renomear e excluir",
+    "Listas: criar, renomear e excluir",
+    "Cartões: criar, editar título e descrição, excluir e arrastar entre listas",
+    "Atendimento: tickets em formato de conversa, com status aberto ou resolvido"
+  ],
+  "notAvailable": [
+    "Convite de pessoas e permissões por quadro",
+    "Exportação de cartões",
+    "Etiquetas, datas de entrega, anexos e notificações"
+  ],
+  "pricing": null,
+  "plans": null,
+  "deliveryDates": null,
+  "whenUnknown": "Não há informação sobre preço, planos ou prazos. Responder que a informação não está disponível e oferecer encaminhar para a equipe."
+}
